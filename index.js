@@ -1,46 +1,37 @@
-// index.js
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const User = require('./schema.js'); // Import the User schema
 
+// Load Environment Variables from .env File
 dotenv.config();
 
+// Initialize Express App
 const app = express();
-app.use(express.json()); // Middleware to parse JSON requests
 
-// Connect to MongoDB
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log('Connected to database'))
-  .catch((err) => console.error('Error connecting to database:', err));
+// Define the Port from Environment Variables or Default to 5000
+const PORT = process.env.PORT || 5000;
 
-// POST API Endpoint
-app.post('/api/users', async (req, res) => {
-  try {
-    const userData = req.body;
+// MongoDB Connection URI from Environment Variables
+const mongoURI = process.env.MONGO_URI;
 
-    // Validate and save user data
-    const newUser = new User(userData);
-    await newUser.save();
-
-    res.status(201).json({ message: 'User created successfully' });
-  } catch (error) {
-    if (error.name === 'ValidationError') {
-      res
-        .status(400)
-        .json({ message: 'Validation error', details: error.message });
-    } else {
-      res.status(500).json({ message: 'Server error', details: error.message });
-    }
-  }
+// Connect to MongoDB using Mongoose
+mongoose.connect(mongoURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => {
+  console.log('Connected to database');
+})
+.catch((error) => {
+  console.error('Error connecting to database:', error.message);
 });
 
-// Start server
-const PORT = 3000;
+// Define a Simple Route for Testing
+app.get('/', (req, res) => {
+  res.send('Customer Management System Backend is Running');
+});
+
+// Start the Express Server
 app.listen(PORT, () => {
-  console.log(`Server running on port${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
